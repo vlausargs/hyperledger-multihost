@@ -1,0 +1,48 @@
+name: laptop2
+networks:
+  fabric:
+    name: fabric
+
+volumes:
+  ordererdata:
+  peer0org2:
+  peer0org3:
+
+
+services:
+  peer0.org3.example.com:
+    image: hyperledger/fabric-peer:${FABRIC_VERSION}
+    container_name: peer0.org3.example.com
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_ID=peer0.org3.example.com
+      - CORE_PEER_ADDRESS=peer0.org3.example.com:${ORG3_PEER_PORT}
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:${ORG3_PEER_PORT}
+      - CORE_PEER_CHAINCODEADDRESS=peer0.org3.example.com:${ORG3_CC_PORT}
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:${ORG3_CC_PORT}
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org3.example.com:${ORG3_PEER_PORT}
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org3.example.com:${ORG3_PEER_PORT}
+      - CORE_PEER_LOCALMSPID=Org3MSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric
+      - CORE_LEDGER_STATE_STATEDATABASE=goleveldb
+      - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9446
+    ports:
+      - "${ORG3_PEER_PORT}:${ORG3_PEER_PORT}"
+      - "${ORG3_CC_PORT}:${ORG3_CC_PORT}"
+      - "9446:9446"
+    volumes:
+      - /var/run/:/host/var/run/
+      - ../organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/fabric/msp
+      - ../organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls:/etc/hyperledger/fabric/tls
+      - peer0org3:/var/hyperledger/production
+    extra_hosts:
+      - "peer0.org1.example.com:${LAPTOP1_IP}"
+      - "peer0.org2.example.com:${LAPTOP2_IP}"
+      - "peer0.org3.example.com:${LAPTOP2_IP}"
+    networks: [fabric]

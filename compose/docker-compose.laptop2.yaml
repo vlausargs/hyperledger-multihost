@@ -1,0 +1,217 @@
+name: laptop2
+networks:
+  fabric:
+    name: fabric
+
+volumes:
+  ordererdata:
+  peer0org2:
+  peer0org3:
+
+
+services:
+  ca_orderer:
+    image: hyperledger/fabric-ca:${CA_VERSION}
+    container_name: ca.orderer.example.com
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-orderer
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=${ORDERER_CA_PORT}
+      - FABRIC_CA_SERVER_CSR_HOSTS=localhost,ca.orderer.example.com,${LAPTOP2_IP}
+    ports:
+      - "${ORDERER_CA_PORT}:${ORDERER_CA_PORT}"
+    volumes:
+      - ../organizations/fabric-ca/orderer/ca:/etc/hyperledger/fabric-ca-server
+    command: sh -c "fabric-ca-server start -b admin:adminpw -d"
+    networks: [fabric]
+
+  tlsca_orderer:
+    image: hyperledger/fabric-ca:${CA_VERSION}
+    container_name: tlsca.orderer.example.com
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=tlsca-orderer
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=${ORDERER_TLSCA_PORT}
+      - FABRIC_CA_SERVER_CSR_HOSTS=localhost,tlsca.orderer.example.com,${LAPTOP2_IP}
+    ports:
+      - "${ORDERER_TLSCA_PORT}:${ORDERER_TLSCA_PORT}"
+    volumes:
+      - ../organizations/fabric-ca/orderer/tlsca:/etc/hyperledger/fabric-ca-server
+    command: sh -c "fabric-ca-server start -b admin:adminpw -d"
+    networks: [fabric]
+
+  ca_org2:
+    image: hyperledger/fabric-ca:${CA_VERSION}
+    container_name: ca.org2.example.com
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-org2
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=${ORG2_CA_PORT}
+      - FABRIC_CA_SERVER_CSR_HOSTS=localhost,ca.org2.example.com,${LAPTOP2_IP}
+    ports:
+      - "${ORG2_CA_PORT}:${ORG2_CA_PORT}"
+    volumes:
+      - ../organizations/fabric-ca/org2/ca:/etc/hyperledger/fabric-ca-server
+    command: sh -c "fabric-ca-server start -b admin:adminpw -d"
+    networks: [fabric]
+
+  tlsca_org2:
+    image: hyperledger/fabric-ca:${CA_VERSION}
+    container_name: tlsca.org2.example.com
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=tlsca-org2
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=${ORG2_TLSCA_PORT}
+      - FABRIC_CA_SERVER_CSR_HOSTS=localhost,tlsca.org2.example.com,${LAPTOP2_IP}
+    ports:
+      - "${ORG2_TLSCA_PORT}:${ORG2_TLSCA_PORT}"
+    volumes:
+      - ../organizations/fabric-ca/org2/tlsca:/etc/hyperledger/fabric-ca-server
+    command: sh -c "fabric-ca-server start -b admin:adminpw -d"
+    networks: [fabric]
+
+  ca_org3:
+    image: hyperledger/fabric-ca:${CA_VERSION}
+    container_name: ca.org3.example.com
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-org3
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=${ORG3_CA_PORT}
+      - FABRIC_CA_SERVER_CSR_HOSTS=localhost,ca.org3.example.com,${LAPTOP2_IP}
+    ports:
+      - "${ORG3_CA_PORT}:${ORG3_CA_PORT}"
+    volumes:
+      - ../organizations/fabric-ca/org3/ca:/etc/hyperledger/fabric-ca-server
+    command: sh -c "fabric-ca-server start -b admin:adminpw -d"
+    networks: [fabric]
+
+  tlsca_org3:
+    image: hyperledger/fabric-ca:${CA_VERSION}
+    container_name: tlsca.org3.example.com
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=tlsca-org3
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=${ORG3_TLSCA_PORT}
+      - FABRIC_CA_SERVER_CSR_HOSTS=localhost,tlsca.org3.example.com,${LAPTOP2_IP}
+    ports:
+      - "${ORG3_TLSCA_PORT}:${ORG3_TLSCA_PORT}"
+    volumes:
+      - ../organizations/fabric-ca/org3/tlsca:/etc/hyperledger/fabric-ca-server
+    command: sh -c "fabric-ca-server start -b admin:adminpw -d"
+    networks: [fabric]
+
+  orderer.example.com:
+    image: hyperledger/fabric-orderer:${FABRIC_VERSION}
+    container_name: orderer.example.com
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_LISTENPORT=${ORDERER_PORT}
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+
+      - ORDERER_CHANNELPARTICIPATION_ENABLED=true
+
+      - ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:${ORDERER_ADMIN_PORT}
+      - ORDERER_ADMIN_TLS_ENABLED=true
+      - ORDERER_ADMIN_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_ADMIN_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_ADMIN_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_ADMIN_TLS_CLIENTAUTHREQUIRED=true
+      - ORDERER_ADMIN_TLS_CLIENTROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+
+      - ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:9444
+    ports:
+      - "${ORDERER_PORT}:${ORDERER_PORT}"
+      - "${ORDERER_ADMIN_PORT}:${ORDERER_ADMIN_PORT}"
+      - "9444:9444"
+    volumes:
+      - ../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
+      - ../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls:/var/hyperledger/orderer/tls
+      - ordererdata:/var/hyperledger/production/orderer
+    extra_hosts:
+      - "peer0.org1.example.com:${LAPTOP1_IP}"
+      - "peer0.org2.example.com:${LAPTOP2_IP}"
+      - "peer0.org3.example.com:${LAPTOP2_IP}"
+    networks: [fabric]
+
+  peer0.org2.example.com:
+    image: hyperledger/fabric-peer:${FABRIC_VERSION}
+    container_name: peer0.org2.example.com
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_ID=peer0.org2.example.com
+      - CORE_PEER_ADDRESS=peer0.org2.example.com:${ORG2_PEER_PORT}
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:${ORG2_PEER_PORT}
+      - CORE_PEER_CHAINCODEADDRESS=peer0.org2.example.com:${ORG2_CC_PORT}
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:${ORG2_CC_PORT}
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:${ORG2_PEER_PORT}
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:${ORG2_PEER_PORT}
+      - CORE_PEER_LOCALMSPID=Org2MSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric
+      - CORE_LEDGER_STATE_STATEDATABASE=goleveldb
+      - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9445
+    ports:
+      - "${ORG2_PEER_PORT}:${ORG2_PEER_PORT}"
+      - "${ORG2_CC_PORT}:${ORG2_CC_PORT}"
+      - "9445:9445"
+    volumes:
+      - /var/run/:/host/var/run/
+      - ../organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
+      - ../organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/etc/hyperledger/fabric/tls
+      - peer0org2:/var/hyperledger/production
+    extra_hosts:
+      - "peer0.org1.example.com:${LAPTOP1_IP}"
+    networks: [fabric]
+
+  peer0.org3.example.com:
+    image: hyperledger/fabric-peer:${FABRIC_VERSION}
+    container_name: peer0.org3.example.com
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_ID=peer0.org3.example.com
+      - CORE_PEER_ADDRESS=peer0.org3.example.com:${ORG3_PEER_PORT}
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:${ORG3_PEER_PORT}
+      - CORE_PEER_CHAINCODEADDRESS=peer0.org3.example.com:${ORG3_CC_PORT}
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:${ORG3_CC_PORT}
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org3.example.com:${ORG3_PEER_PORT}
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org3.example.com:${ORG3_PEER_PORT}
+      - CORE_PEER_LOCALMSPID=Org3MSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric
+      - CORE_LEDGER_STATE_STATEDATABASE=goleveldb
+      - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9446
+    ports:
+      - "${ORG3_PEER_PORT}:${ORG3_PEER_PORT}"
+      - "${ORG3_CC_PORT}:${ORG3_CC_PORT}"
+      - "9446:9446"
+    volumes:
+      - /var/run/:/host/var/run/
+      - ../organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/fabric/msp
+      - ../organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls:/etc/hyperledger/fabric/tls
+      - peer0org3:/var/hyperledger/production
+    extra_hosts:
+      - "peer0.org1.example.com:${LAPTOP1_IP}"
+    networks: [fabric]
