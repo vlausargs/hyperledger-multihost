@@ -1,0 +1,21 @@
+{
+    "root_dir": "/home/myindo/workspace/myindo/fabric-2pc-3org-template",
+    "org": "org1",
+    "domain": "example.com",
+    "ca": {
+        "name": "ca-org1",
+        "host": "localhost",
+        "port": 7054,
+        "tls_cert": "/home/myindo/workspace/myindo/fabric-2pc-3org-template/organizations/fabric-ca/org1/ca/tls-cert.pem",
+        "admin_user": "admin",
+        "admin_pass": "adminpw"
+    },
+    "tlsca": {
+        "name": "tlsca-org1",
+        "host": "localhost",
+        "port": 7055,
+        "tls_cert": "/home/myindo/workspace/myindo/fabric-2pc-3org-template/organizations/fabric-ca/org1/tlsca/tls-cert.pem",
+        "admin_user": "admin",
+        "admin_pass": "adminpw"
+    }
+}

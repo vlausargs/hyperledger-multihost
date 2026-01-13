@@ -45,7 +45,7 @@ url: https://localhost:7054
 # Membership Service Provider (MSP) directory
 # This is useful when the client is used to enroll a peer or orderer, so
 # that the enrollment artifacts are stored in the format expected by MSP.
-mspdir: msp
+mspdir: /home/valos/workspace/hyperledger/hyperledger-multihost/organizations/peerOrganizations/org1.example.com/msp
 
 #############################################################################
 #    TLS section for secure socket connection
@@ -117,7 +117,7 @@ csr:
       O: Hyperledger
       OU: Fabric
   hosts:
-    - myindodevel03
+    - argustein
 
 #############################################################################
 #  Registration section used to register a new identity with fabric-ca server
