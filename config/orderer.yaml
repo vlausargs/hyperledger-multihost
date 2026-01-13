@@ -1,0 +1,58 @@
+# -----------------------------------------------------------------------------
+# Hyperledger Fabric orderer configuration (orderer.yaml)
+#
+# This file provides default configuration values for the Fabric `orderer`
+# process. In this template, orderer containers are configured via ORDERER_*
+# environment variables, but the file is still useful when running `orderer`
+# binaries locally and aligns the project layout with Fabric "sampleconfig".
+# -----------------------------------------------------------------------------
+
+General:
+  ListenAddress: 0.0.0.0
+  ListenPort: 7050
+
+  LocalMSPID: OrdererMSP
+  LocalMSPDir: msp
+
+  # With channel participation enabled, the orderer does not use a system channel.
+  BootstrapMethod: none
+
+  TLS:
+    Enabled: true
+    PrivateKey: tls/server.key
+    Certificate: tls/server.crt
+    RootCAs:
+      - tls/ca.crt
+
+  # Cluster TLS (safe defaults; for a single orderer this can reuse server certs).
+  Cluster:
+    ClientCertificate: tls/server.crt
+    ClientPrivateKey: tls/server.key
+    RootCAs:
+      - tls/ca.crt
+
+ChannelParticipation:
+  Enabled: true
+
+Admin:
+  ListenAddress: 0.0.0.0:7053
+  TLS:
+    Enabled: true
+    Certificate: tls/server.crt
+    PrivateKey: tls/server.key
+    RootCAs:
+      - tls/ca.crt
+    ClientAuthRequired: true
+    ClientRootCAs:
+      - tls/ca.crt
+
+FileLedger:
+  Location: /var/hyperledger/production/orderer
+
+Operations:
+  ListenAddress: 127.0.0.1:9444
+  TLS:
+    Enabled: false
+
+Metrics:
+  Provider: disabled

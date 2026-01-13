@@ -1,0 +1,72 @@
+# -----------------------------------------------------------------------------
+# Hyperledger Fabric peer configuration (core.yaml)
+#
+# This file provides default configuration values for the Fabric `peer` CLI and
+# peer processes. In this template, most runtime values are overridden via
+# environment variables (CORE_*, FABRIC_*), but the file must exist because the
+# peer binary always loads "core.yaml" from FABRIC_CFG_PATH.
+# -----------------------------------------------------------------------------
+
+peer:
+  # These are safe defaults; scripts override them via environment variables.
+  id: peer0
+  networkId: dev
+  listenAddress: 0.0.0.0:7051
+  address: 0.0.0.0:7051
+  addressAutoDetect: true
+
+  # Local MSP settings (usually overridden by CORE_PEER_MSPCONFIGPATH / CORE_PEER_LOCALMSPID).
+  localMspId: Org1MSP
+  mspConfigPath: msp
+
+  # Data directory (container default). CLI overrides do not require this to exist.
+  fileSystemPath: /var/hyperledger/production
+
+  tls:
+    enabled: true
+
+
+
+  # BCCSP is the crypto provider configuration used by the peer CLI/process.
+  # Without this stanza the `peer` binary can fail to start with:
+  #   "could not get peer BCCSP configuration"
+  BCCSP:
+    Default: SW
+    SW:
+      Hash: SHA2
+      Security: 256
+      FileKeyStore:
+        # Leave empty to use the keystore under CORE_PEER_MSPCONFIGPATH.
+        KeyStore: ""
+  # Gossip defaults (overridden by CORE_PEER_GOSSIP_* in compose).
+  gossip:
+    bootstrap: 127.0.0.1:7051
+    endpoint: 127.0.0.1:7051
+    externalEndpoint: 127.0.0.1:7051
+    useLeaderElection: true
+    orgLeader: false
+
+  # Chaincode service defaults (overridden by CORE_PEER_CHAINCODE*).
+  chaincode:
+    listenAddress: 0.0.0.0:7052
+    address: 127.0.0.1:7052
+
+  # Operations endpoint (overridden by CORE_OPERATIONS_LISTENADDRESS).
+  operations:
+    listenAddress: 127.0.0.1:9443
+    tls:
+      enabled: false
+
+# Docker VM endpoint (overridden by CORE_VM_* in compose).
+vm:
+  endpoint: unix:///var/run/docker.sock
+  docker:
+    tls:
+      enabled: false
+
+ledger:
+  state:
+    stateDatabase: goleveldb
+
+metrics:
+  provider: disabled

@@ -8,7 +8,7 @@ set -a
 source ./.env
 set +a
 
-export FABRIC_CFG_PATH="${ROOT_DIR}/configtx"
+export FABRIC_CFG_PATH="${ROOT_DIR}/config"
 
 # Common paths
 export ORDERER_CA="${ROOT_DIR}/organizations/ordererOrganizations/${DOMAIN}/orderers/orderer.${DOMAIN}/tls/ca.crt"

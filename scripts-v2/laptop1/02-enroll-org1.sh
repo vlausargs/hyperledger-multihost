@@ -9,6 +9,8 @@ TLSCA_PORT="${ORG1_TLSCA_PORT}"
 CA_NAME="ca-org1"
 TLSCA_NAME="tlsca-org1"
 
+sudo chown $USER:$USER "${ROOT_DIR}/organizations" -R 
+
 CA_TLS_CERT="${ROOT_DIR}/organizations/fabric-ca/org1/ca/tls-cert.pem"
 TLSCA_TLS_CERT="${ROOT_DIR}/organizations/fabric-ca/org1/tlsca/tls-cert.pem"
 
@@ -18,9 +20,13 @@ PEER_FQDN="peer0.${ORG}.${DOMAIN}"
 ORG_HOME="${ROOT_DIR}/organizations/peerOrganizations/${ORG}.${DOMAIN}"
 TLSCA_CLIENT_HOME="${ORG_HOME}/.tlsca-client"
 
+echo "==> Clean previous peer TLS material (so reruns don't accumulate keys)"
+rm -rf "${ORG_HOME}"
+
 mkdir -p "${ORG_HOME}"
 mkdir -p "${TLSCA_CLIENT_HOME}"
 
+  
 # -----------------------------
 # Helpers
 # -----------------------------

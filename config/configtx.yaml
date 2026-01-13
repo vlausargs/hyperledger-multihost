@@ -102,7 +102,6 @@ Channel: &ChannelDefaults
 Profiles:
   ThreeOrgsChannel:
     <<: *ChannelDefaults
-    Consortium: SampleConsortium
     Orderer:
       <<: *OrdererDefaults
       Organizations:
@@ -113,10 +112,3 @@ Profiles:
         - *Org1
         - *Org2
         - *Org3
-
-Consortiums:
-  SampleConsortium:
-    Organizations:
-      - *Org1
-      - *Org2
-      - *Org3
