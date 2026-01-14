@@ -319,7 +319,7 @@ csr:
         O: Hyperledger
         OU: Fabric
    hosts:
-     - myindodevel03
+     - argustein
      - localhost
    ca:
       expiry: 131400h

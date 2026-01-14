@@ -10,8 +10,11 @@ source "$ROOT_DIR/scripts-v2/00-env.sh"
   --ca-port  ${ORG1_CA_PORT} \
   --tlsca-port ${ORG1_TLSCA_PORT} \
   --ca-name ca-org1 \
-  --tlsca-name tlsca-org1
-
+  --tlsca-name tlsca-org1 \
+  --ca-admin-user admin \
+  --ca-admin-pass adminpw \
+  --tlsca-admin-user admin \
+  --tlsca-admin-pass adminpw 
 
 # ./fabric-enroller/fabric-enroller enroll-user \
 #   --root-dir $ROOT_DIR \

@@ -1,37 +1,33 @@
 name: laptop2
-networks:
-  fabric:
-    name: fabric
+x-global_env: &global_env
+  FABRIC_CA_HOME: /etc/hyperledger/fabric-ca-server
+  FABRIC_CA_SERVER_TLS_ENABLED: true
 
 services:
   ca_orderer:
     image: hyperledger/fabric-ca:${CA_VERSION}
-    container_name: ca.orderer.example.com
+    container_name: ca_orderer
+    network_mode: "host"
     environment:
-      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      - FABRIC_CA_SERVER_CA_NAME=ca-orderer
-      - FABRIC_CA_SERVER_TLS_ENABLED=true
-      - FABRIC_CA_SERVER_PORT=${ORDERER_CA_PORT}
-      - FABRIC_CA_SERVER_CSR_HOSTS=localhost,ca.orderer.example.com,${LAPTOP2_IP}
-    ports:
-      - "${ORDERER_CA_PORT}:${ORDERER_CA_PORT}"
+      <<: *global_env
+      FABRIC_CA_SERVER_CA_NAME: ca-orderer
+      FABRIC_CA_SERVER_PORT: ${ORDERER_CA_PORT}
+      FABRIC_CA_SERVER_CSR_HOSTS: localhost,ca.orderer.example.com,${LAPTOP2_IP}
+      FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS: "0.0.0.0:${ORDERER_CA_OPERATION_PORT}"
     volumes:
       - ../organizations/fabric-ca/orderer/ca:/etc/hyperledger/fabric-ca-server
     command: sh -c "fabric-ca-server start -b admin:adminpw -d"
-    networks: [fabric]
 
   tlsca_orderer:
     image: hyperledger/fabric-ca:${CA_VERSION}
-    container_name: tlsca.orderer.example.com
+    container_name: tlsca_orderer
+    network_mode: "host"
     environment:
-      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      - FABRIC_CA_SERVER_CA_NAME=tlsca-orderer
-      - FABRIC_CA_SERVER_TLS_ENABLED=true
-      - FABRIC_CA_SERVER_PORT=${ORDERER_TLSCA_PORT}
-      - FABRIC_CA_SERVER_CSR_HOSTS=localhost,tlsca.orderer.example.com,${LAPTOP2_IP}
-    ports:
-      - "${ORDERER_TLSCA_PORT}:${ORDERER_TLSCA_PORT}"
+      <<: *global_env
+      FABRIC_CA_SERVER_CA_NAME: tlsca-orderer
+      FABRIC_CA_SERVER_PORT: ${ORDERER_TLSCA_PORT}
+      FABRIC_CA_SERVER_CSR_HOSTS: localhost,tlsca.orderer.example.com,${LAPTOP2_IP}
+      FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS: "0.0.0.0:${ORDERER_TLSCA_OPERATION_PORT}"
     volumes:
       - ../organizations/fabric-ca/orderer/tlsca:/etc/hyperledger/fabric-ca-server
     command: sh -c "fabric-ca-server start -b admin:adminpw -d"
-    networks: [fabric]

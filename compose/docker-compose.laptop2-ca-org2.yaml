@@ -1,37 +1,33 @@
 name: laptop2
-networks:
-  fabric:
-    name: fabric
+x-global_env: &global_env
+  FABRIC_CA_HOME: /etc/hyperledger/fabric-ca-server
+  FABRIC_CA_SERVER_TLS_ENABLED: true
 
 services:
   ca_org2:
     image: hyperledger/fabric-ca:${CA_VERSION}
-    container_name: ca.org2.example.com
+    container_name: ca_org2
+    network_mode: "host"
     environment:
-      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      - FABRIC_CA_SERVER_CA_NAME=ca-org2
-      - FABRIC_CA_SERVER_TLS_ENABLED=true
-      - FABRIC_CA_SERVER_PORT=${ORG2_CA_PORT}
-      - FABRIC_CA_SERVER_CSR_HOSTS=localhost,ca.org2.example.com,${LAPTOP2_IP}
-    ports:
-      - "${ORG2_CA_PORT}:${ORG2_CA_PORT}"
+      <<: *global_env
+      FABRIC_CA_SERVER_CA_NAME: ca-org2
+      FABRIC_CA_SERVER_PORT: "${ORG2_CA_PORT}"
+      FABRIC_CA_SERVER_CSR_HOSTS: localhost,ca.org2.example.com,${LAPTOP2_IP}
+      FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS: "0.0.0.0:${ORG2_CA_OPERATION_PORT}"
     volumes:
       - ../organizations/fabric-ca/org2/ca:/etc/hyperledger/fabric-ca-server
     command: sh -c "fabric-ca-server start -b admin:adminpw -d"
-    networks: [fabric]
 
   tlsca_org2:
     image: hyperledger/fabric-ca:${CA_VERSION}
-    container_name: tlsca.org2.example.com
+    container_name: tlsca_org2
+    network_mode: "host"
     environment:
-      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      - FABRIC_CA_SERVER_CA_NAME=tlsca-org2
-      - FABRIC_CA_SERVER_TLS_ENABLED=true
-      - FABRIC_CA_SERVER_PORT=${ORG2_TLSCA_PORT}
-      - FABRIC_CA_SERVER_CSR_HOSTS=localhost,tlsca.org2.example.com,${LAPTOP2_IP}
-    ports:
-      - "${ORG2_TLSCA_PORT}:${ORG2_TLSCA_PORT}"
+      <<: *global_env
+      FABRIC_CA_SERVER_CA_NAME: tlsca-org2
+      FABRIC_CA_SERVER_PORT: "${ORG2_TLSCA_PORT}"
+      FABRIC_CA_SERVER_CSR_HOSTS: localhost,tlsca.org2.example.com,${LAPTOP2_IP}
+      FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS: "0.0.0.0:${ORG2_TLSCA_OPERATION_PORT}"
     volumes:
       - ../organizations/fabric-ca/org2/tlsca:/etc/hyperledger/fabric-ca-server
     command: sh -c "fabric-ca-server start -b admin:adminpw -d"
-    networks: [fabric]

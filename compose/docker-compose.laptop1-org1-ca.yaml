@@ -2,7 +2,6 @@ name: laptop1
 # pelajari ini x-variable
 x-global_env: &global_env
   FABRIC_CA_HOME: /etc/hyperledger/fabric-ca-server
-  FABRIC_CA_SERVER_CSR_HOSTS: localhost,ca.org1.example.com,${LAPTOP1_IP}
   FABRIC_CA_SERVER_TLS_ENABLED: true
 
 services:
@@ -11,14 +10,15 @@ services:
     container_name: ca_org1 # gausah hostname, namain aja ca_org1
     network_mode: "host"
     environment:
-      <<:  *global_env
+      <<: *global_env
       FABRIC_CA_SERVER_CA_NAME: ca-org1
       FABRIC_CA_SERVER_PORT: "${ORG1_CA_PORT}"
+      FABRIC_CA_SERVER_CSR_HOSTS: localhost,ca.org1.example.com,${LAPTOP1_IP}
       FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS: "0.0.0.0:${ORG1_CA_OPERATION_PORT}"
     volumes:
       - ../organizations/fabric-ca/org1/ca:/etc/hyperledger/fabric-ca-server
     command: sh -c "fabric-ca-server start -b admin:adminpw -d"
-    
+
     # networks: [fabric]
     # extra_hosts:
     #   - "hostname:ip"
@@ -28,9 +28,10 @@ services:
     container_name: tlsca_org1
     network_mode: "host"
     environment:
-      <<:  *global_env
+      <<: *global_env
       FABRIC_CA_SERVER_CA_NAME: tlsca-org1
       FABRIC_CA_SERVER_PORT: "${ORG1_TLSCA_PORT}"
+      FABRIC_CA_SERVER_CSR_HOSTS: localhost,tlsca.org1.example.com,${LAPTOP1_IP}
       FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS: "0.0.0.0:${ORG1_TLSCA_OPERATION_PORT}"
     volumes:
       - ../organizations/fabric-ca/org1/tlsca:/etc/hyperledger/fabric-ca-server
