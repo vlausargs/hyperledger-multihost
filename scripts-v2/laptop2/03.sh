@@ -3,6 +3,8 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts-v2/00-env.sh"
 
+sudo chown $USER:$USER "${ROOT_DIR}/organizations" -R
+
 ./fabric-enroller/fabric-enroller enroll-org \
   --root-dir $ROOT_DIR \
   --org org3 --domain example.com \

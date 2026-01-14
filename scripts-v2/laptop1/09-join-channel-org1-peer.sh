@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-source "$ROOT_DIR/scripts-v2/00-env.sh" 
+source "$ROOT_DIR/scripts-v2/00-env.sh"
 peer_env_org1
 
 #check peer msp
@@ -20,15 +20,11 @@ configtxlator proto_decode --input "$TMP/config.block" --type common.Block \
 
 
 echo "==> org1 peer join channel ${CHANNEL_NAME}"
-# peer channel join -b "channel-artifacts/${CHANNEL_NAME}.block"
+peer channel join -b "channel-artifacts/${CHANNEL_NAME}.block"
 
-echo "==> org1 channel update"
-peer channel update \
-  -o "orderer.${DOMAIN}:${ORDERER_PORT}" \
-  -c "${CHANNEL_NAME}" \
-  -f "channel-artifacts/Org1MSPanchors.tx" \
-  --tls --cafile "${ORDERER_CA}"
-
-
-
-
+# echo "==> org1 channel update"
+# peer channel update \
+#   -o "orderer.${DOMAIN}:${ORDERER_PORT}" \
+#   -c "${CHANNEL_NAME}" \
+#   -f "channel-artifacts/Org1MSPanchors.tx" \
+#   --tls --cafile "${ORDERER_CA}"

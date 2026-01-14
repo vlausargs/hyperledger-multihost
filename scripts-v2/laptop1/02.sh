@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-source "$ROOT_DIR/scripts-v2/00-env.sh" 
+source "$ROOT_DIR/scripts-v2/00-env.sh"
+
+sudo chown $USER:$USER "${ROOT_DIR}/organizations" -R
 
 ./fabric-enroller/fabric-enroller enroll-org \
   --root-dir $ROOT_DIR \
@@ -14,7 +16,7 @@ source "$ROOT_DIR/scripts-v2/00-env.sh"
   --ca-admin-user admin \
   --ca-admin-pass adminpw \
   --tlsca-admin-user admin \
-  --tlsca-admin-pass adminpw 
+  --tlsca-admin-pass adminpw
 
 # ./fabric-enroller/fabric-enroller enroll-user \
 #   --root-dir $ROOT_DIR \
