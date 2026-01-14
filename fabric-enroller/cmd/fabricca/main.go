@@ -20,6 +20,8 @@ func main() {
 	switch os.Args[1] {
 	case "enroll-org":
 		cmdEnrollOrg(os.Args[2:])
+	case "enroll-orderer":
+		cmdEnrollOrderer(os.Args[2:])
 	case "register":
 		cmdRegister(os.Args[2:])
 	case "enroll":
@@ -36,10 +38,11 @@ func usage() {
 	fmt.Fprintf(os.Stderr, `fabric-enroller - Hyperledger Fabric CA enrollment helper
 
 Commands:
-  enroll-org    Full org bootstrap (CA admin enroll, register ids, peer MSP+TLS, org admin MSP)
-  register      Register an identity (idempotent)
-  enroll        Enroll an identity into an MSP/TLS directory
-  enroll-user   Convenience: register+enroll a client/admin user into organizations/.../users/...
+  enroll-org		Full org bootstrap (CA admin enroll, register ids, peer MSP+TLS, org admin MSP)
+  enroll-orderer	Full orderer bootstrap (CA admin enroll, register ids, orderer MSP+TLS, orderer admin MSP+TLS)
+  register			Register an identity (idempotent)
+  enroll			Enroll an identity into an MSP/TLS directory
+  enroll-user		Convenience: register+enroll a client/admin user into organizations/.../users/...
 
 Examples:
   # Full org (similar to your script)
@@ -48,6 +51,13 @@ Examples:
     --org org1 --domain example.com \
     --ca-port 7054 --tlsca-port 7055 \
     --ca-name ca-org1 --tlsca-name tlsca-org1
+
+  # Full orderer (similar to your 06-enroll-orderer.sh)
+  fabric-enroller enroll-orderer \
+    --root-dir /path/to/fabric-2pc-3org-template \
+    --domain example.com \
+    --ca-port 9054 --tlsca-port 9055 \
+    --ca-name ca-orderer --tlsca-name tlsca-orderer
 
   # Add a new client user (register + enroll)
   fabric-enroller enroll-user \
@@ -149,24 +159,24 @@ func cmdEnrollOrg(args []string) {
 	}
 
 	cfg := enroll.EnrollOrgConfig{
-		RootDir: absRoot,
-		Org:     *org,
-		Domain:  *domain,
-		Peer:    *peer,
-		Clean:   *clean,
+		RootDir:  absRoot,
+		Org:      *org,
+		Domain:   *domain,
+		Peer:     *peer,
+		Clean:    *clean,
 		FixPerms: *fixPerms,
 
 		CA: enroll.CAConfig{
-			Port:     *caPort,
-			Name:     *caName,
-			TLSCert:  *caTLSCert,
+			Port:      *caPort,
+			Name:      *caName,
+			TLSCert:   *caTLSCert,
 			AdminUser: *caAdminUser,
 			AdminPass: *caAdminPass,
 		},
 		TLSCA: enroll.CAConfig{
-			Port:     *tlscaPort,
-			Name:     *tlscaName,
-			TLSCert:  *tlscaTLSCert,
+			Port:      *tlscaPort,
+			Name:      *tlscaName,
+			TLSCert:   *tlscaTLSCert,
 			AdminUser: *tlscaAdminUser,
 			AdminPass: *tlscaAdminPass,
 		},
@@ -183,6 +193,114 @@ func cmdEnrollOrg(args []string) {
 
 	client := fabricca.NewClient("fabric-ca-client")
 	if err := enroll.RunEnrollOrg(cfg, client); err != nil {
+		fmt.Fprintln(os.Stderr, "ERROR:", err)
+		os.Exit(1)
+	}
+}
+
+func cmdEnrollOrderer(args []string) {
+	fs := flag.NewFlagSet("enroll-orderer", flag.ExitOnError)
+
+	rootDir := fs.String("root-dir", "", "Root directory of your fabric project (contains organizations/)")
+	domain := fs.String("domain", "", "Domain, e.g. example.com")
+	orderer := fs.String("orderer", "orderer", "Orderer name, e.g. orderer")
+	clean := fs.Bool("clean", true, "Remove existing orderer org home before enrolling (idempotent rerun)")
+	fixPerms := fs.Bool("fix-perms", false, "Attempt to chown organizations/ recursively to current user (may require root)")
+	enrollAdminTLS := fs.Bool("enroll-admin-tls", true, "Also enroll orderer admin TLS for osnadmin mTLS")
+
+	caPort := fs.Int("ca-port", 0, "Orderer CA port, e.g. 9054")
+	tlscaPort := fs.Int("tlsca-port", 0, "Orderer TLSCA port, e.g. 9055")
+	caName := fs.String("ca-name", "", "Orderer CA name, e.g. ca-orderer")
+	tlscaName := fs.String("tlsca-name", "", "Orderer TLSCA name, e.g. tlsca-orderer")
+
+	caAdminUser := fs.String("ca-admin-user", "admin", "CA admin user")
+	caAdminPass := fs.String("ca-admin-pass", "adminpw", "CA admin password")
+	tlscaAdminUser := fs.String("tlsca-admin-user", "admin", "TLSCA admin user")
+	tlscaAdminPass := fs.String("tlsca-admin-pass", "adminpw", "TLSCA admin password")
+
+	caTLSCert := fs.String("ca-tls-cert", "", "Path to Orderer CA tls-cert.pem")
+	tlscaTLSCert := fs.String("tlsca-tls-cert", "", "Path to Orderer TLSCA tls-cert.pem")
+
+	var ids idSpecList
+	fs.Var(&ids, "id", "Identity to register on CA and TLSCA: name:secret:type (repeatable). Defaults: orderer/ordereradmin")
+
+	if err := fs.Parse(args); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(2)
+	}
+
+	if *rootDir == "" {
+		wd, _ := os.Getwd()
+		*rootDir = wd
+	}
+	absRoot, _ := filepath.Abs(*rootDir)
+
+	if *domain == "" {
+		fmt.Fprintln(os.Stderr, "--domain is required")
+		os.Exit(2)
+	}
+	if *caPort == 0 || *tlscaPort == 0 {
+		fmt.Fprintln(os.Stderr, "--ca-port and --tlsca-port are required")
+		os.Exit(2)
+	}
+	if *caName == "" || *tlscaName == "" {
+		fmt.Fprintln(os.Stderr, "--ca-name and --tlsca-name are required")
+		os.Exit(2)
+	}
+
+	// Default cert locations for orderer CA/TLSCA.
+	if *caTLSCert == "" {
+		*caTLSCert = filepath.Join(absRoot, "organizations", "fabric-ca", "orderer", "ca", "tls-cert.pem")
+	}
+	if *tlscaTLSCert == "" {
+		*tlscaTLSCert = filepath.Join(absRoot, "organizations", "fabric-ca", "orderer", "tlsca", "tls-cert.pem")
+	}
+
+	// Default identities if user didn't specify any.
+	if len(ids) == 0 {
+		ids = append(ids,
+			fmt.Sprintf("%s:%spw:orderer", *orderer, *orderer),
+			"ordereradmin:ordereradminpw:admin",
+		)
+	}
+
+	cfg := enroll.EnrollOrdererConfig{
+		RootDir:  absRoot,
+		Domain:   *domain,
+		Orderer:  *orderer,
+		Clean:    *clean,
+		FixPerms: *fixPerms,
+
+		EnrollAdminTLS: *enrollAdminTLS,
+
+		CA: enroll.CAConfig{
+			Port:      *caPort,
+			Name:      *caName,
+			TLSCert:   *caTLSCert,
+			AdminUser: *caAdminUser,
+			AdminPass: *caAdminPass,
+		},
+		TLSCA: enroll.CAConfig{
+			Port:      *tlscaPort,
+			Name:      *tlscaName,
+			TLSCert:   *tlscaTLSCert,
+			AdminUser: *tlscaAdminUser,
+			AdminPass: *tlscaAdminPass,
+		},
+	}
+
+	for _, spec := range ids {
+		n, s, t, err := parseIDSpec(spec)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(2)
+		}
+		cfg.RegisterOnCA = append(cfg.RegisterOnCA, enroll.IdentitySpec{Name: n, Secret: s, Type: t})
+		cfg.RegisterOnTLSCA = append(cfg.RegisterOnTLSCA, enroll.IdentitySpec{Name: n, Secret: s, Type: t})
+	}
+
+	client := fabricca.NewClient("fabric-ca-client")
+	if err := enroll.RunEnrollOrderer(cfg, client); err != nil {
 		fmt.Fprintln(os.Stderr, "ERROR:", err)
 		os.Exit(1)
 	}
