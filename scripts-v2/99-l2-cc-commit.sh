@@ -2,7 +2,7 @@
 set -euo pipefail
 source "$(dirname "$0")/00-env.sh"
 
-peer_env_org2
+peer_env_org1
 
 # Increase delivery client timeout to prevent timeout when fetching blocks from orderer
 export CORE_PEER_DELIVERYCLIENT_TIMEOUT=300s
