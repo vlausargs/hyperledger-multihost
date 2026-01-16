@@ -3,6 +3,10 @@ set -euo pipefail
 source "$(dirname "$0")/00-env.sh"
 peer_env_org2
 
+# Increase delivery client timeout to prevent timeout when fetching blocks from orderer
+export CORE_PEER_DELIVERYCLIENT_TIMEOUT=300s
+export CORE_PEER_CLIENT_TIMEOUT=300s
+
 echo "==> Check commit readiness (Org2 context)"
 peer lifecycle chaincode checkcommitreadiness \
   --channelID "${CHANNEL_NAME}" \
