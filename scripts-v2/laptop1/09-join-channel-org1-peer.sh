@@ -6,21 +6,26 @@ peer_env_org1
 
 #check peer msp
 echo "==> Checking Peer MSP"
-TMP=/tmp/${CHANNEL_NAME}-cfg
-mkdir -p "$TMP"
-
-peer channel fetch config "$TMP/config.block" \
-  -o "orderer.${DOMAIN}:${ORDERER_PORT}" \
-  -c "${CHANNEL_NAME}" \
-  --tls --cafile "${ORDERER_CA}"
-
-configtxlator proto_decode --input "$TMP/config.block" --type common.Block \
-| jq -r '.data.data[0].payload.data.config
-  .channel_group.groups.Application.groups.Org1MSP.values.AnchorPeers.value.anchor_peers'
 
 
 echo "==> org1 peer join channel ${CHANNEL_NAME}"
+set +e
 peer channel join -b "channel-artifacts/${CHANNEL_NAME}.block"
+JOIN_EXIT_CODE=$?
+set -e
+
+if [ $JOIN_EXIT_CODE -ne 0 ]; then
+  # Check if peer is already joined
+  echo "Join failed, checking if peer is already in the channel..."
+  if peer channel list 2>/dev/null | grep -q "${CHANNEL_NAME}"; then
+    echo "Peer is already joined to channel ${CHANNEL_NAME}"
+  else
+    echo "Error: Failed to join peer to channel ${CHANNEL_NAME} (exit code: $JOIN_EXIT_CODE)"
+    exit 1
+  fi
+else
+  echo "Peer joined to channel ${CHANNEL_NAME}"
+fi
 
 # echo "==> org1 channel update"
 # peer channel update \
