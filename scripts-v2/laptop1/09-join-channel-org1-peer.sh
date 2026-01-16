@@ -4,6 +4,10 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts-v2/00-env.sh"
 peer_env_org1
 
+# Increase delivery client timeout to prevent timeout when fetching blocks from orderer
+export CORE_PEER_DELIVERYCLIENT_TIMEOUT=300s
+export CORE_PEER_CLIENT_TIMEOUT=300s
+
 #check peer msp
 echo "==> Checking Peer MSP"
 

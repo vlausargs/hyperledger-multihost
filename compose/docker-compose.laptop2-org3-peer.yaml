@@ -8,7 +8,6 @@ volumes:
   peer0org2:
   peer0org3:
 
-
 services:
   peer0.org3.example.com:
     image: hyperledger/fabric-peer:${FABRIC_VERSION}
@@ -43,6 +42,7 @@ services:
       - ../organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls:/etc/hyperledger/fabric/tls
       - peer0org3:/var/hyperledger/production
     extra_hosts:
+      - "orderer.example.com:${LAPTOP2_IP}"
       - "peer0.org1.example.com:${LAPTOP1_IP}"
       - "peer0.org2.example.com:${LAPTOP2_IP}"
       - "peer0.org3.example.com:${LAPTOP2_IP}"
