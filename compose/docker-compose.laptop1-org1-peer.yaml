@@ -43,4 +43,4 @@ services:
       - "orderer.example.com:${LAPTOP2_IP}"
       - "peer0.org2.example.com:${LAPTOP2_IP}"
       - "peer0.org3.example.com:${LAPTOP2_IP}"
-    networks: [fabric]
+    # networks: [fabric]
