@@ -1,7 +1,7 @@
 name: laptop2
-networks:
-  fabric:
-    name: fabric
+# networks:
+#   fabric:
+#     name: fabric
 
 volumes:
   ordererdata:

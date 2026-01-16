@@ -13,6 +13,7 @@ services:
   peer0.org3.example.com:
     image: hyperledger/fabric-peer:${FABRIC_VERSION}
     container_name: peer0.org3.example.com
+    network_mode: "host"
     environment:
       - FABRIC_LOGGING_SPEC=INFO
       - CORE_PEER_ID=peer0.org3.example.com
@@ -32,10 +33,10 @@ services:
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric
       - CORE_LEDGER_STATE_STATEDATABASE=goleveldb
       - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9446
-    ports:
-      - "${ORG3_PEER_PORT}:${ORG3_PEER_PORT}"
-      - "${ORG3_CC_PORT}:${ORG3_CC_PORT}"
-      - "9446:9446"
+    # ports:
+    #   - "${ORG3_PEER_PORT}:${ORG3_PEER_PORT}"
+    #   - "${ORG3_CC_PORT}:${ORG3_CC_PORT}"
+    #   - "9446:9446"
     volumes:
       - /var/run/:/host/var/run/
       - ../organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/fabric/msp

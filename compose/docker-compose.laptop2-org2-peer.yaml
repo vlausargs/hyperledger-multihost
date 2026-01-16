@@ -1,7 +1,7 @@
 name: laptop2
-networks:
-  fabric:
-    name: fabric
+# networks:
+#   fabric:
+#     name: fabric
 
 volumes:
   ordererdata:
@@ -13,6 +13,7 @@ services:
   peer0.org2.example.com:
     image: hyperledger/fabric-peer:${FABRIC_VERSION}
     container_name: peer0.org2.example.com
+    network_mode: "host"
     environment:
       - FABRIC_LOGGING_SPEC=INFO
       - CORE_PEER_ID=peer0.org2.example.com
@@ -32,10 +33,10 @@ services:
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric
       - CORE_LEDGER_STATE_STATEDATABASE=goleveldb
       - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9445
-    ports:
-      - "${ORG2_PEER_PORT}:${ORG2_PEER_PORT}"
-      - "${ORG2_CC_PORT}:${ORG2_CC_PORT}"
-      - "9445:9445"
+    # ports:
+    #   - "${ORG2_PEER_PORT}:${ORG2_PEER_PORT}"
+    #   - "${ORG2_CC_PORT}:${ORG2_CC_PORT}"
+    #   - "9445:9445"
     volumes:
       - /var/run/:/host/var/run/
       - ../organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
