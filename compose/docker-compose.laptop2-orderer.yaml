@@ -12,6 +12,7 @@ services:
   orderer.example.com:
     image: hyperledger/fabric-orderer:${FABRIC_VERSION}
     container_name: orderer.example.com
+    network_mode: "host"
     environment:
       - FABRIC_LOGGING_SPEC=INFO
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
@@ -36,10 +37,10 @@ services:
       - ORDERER_ADMIN_TLS_CLIENTROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
 
       - ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:9444
-    ports:
-      - "${ORDERER_PORT}:${ORDERER_PORT}"
-      - "${ORDERER_ADMIN_PORT}:${ORDERER_ADMIN_PORT}"
-      - "9444:9444"
+    # ports:
+    #   - "${ORDERER_PORT}:${ORDERER_PORT}"
+    #   - "${ORDERER_ADMIN_PORT}:${ORDERER_ADMIN_PORT}"
+    #   - "9444:9444"
     volumes:
       - ../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
       - ../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls:/var/hyperledger/orderer/tls
@@ -48,4 +49,4 @@ services:
       - "peer0.org1.example.com:${LAPTOP1_IP}"
       - "peer0.org2.example.com:${LAPTOP2_IP}"
       - "peer0.org3.example.com:${LAPTOP2_IP}"
-    networks: [fabric]
+    # networks: [fabric]
